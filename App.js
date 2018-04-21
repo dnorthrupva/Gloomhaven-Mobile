@@ -1,23 +1,24 @@
 import React from 'react';
 import { View, Text, Image } from 'react-native';
 import { Button } from 'react-native-elements';
-import { StackNavigator } from 'react-navigation'; // Version can be specified in package.json
+import { StackNavigator, SwitchNavigator } from 'react-navigation'; // Version can be specified in package.json
 import { YellowBox } from 'react-native';
-import { connect } from "react-redux";
+import store from './redux/store';
+import { Provider, connect } from 'react-redux';
 import firebase from 'firebase';
 import ModalScreen from './components/Modal';
 import HomeScreen from './components/HomeScreen';
 import DetailsScreen from './components/Details';
 import HeaderComponent from './components/Header';
-import CharactersScreen from './screens/Characters';
+import CharactersScreen from './screens/Characters/Characters';
+import SignInScreen from './screens/SignInScreen';
+import AuthLoadingScreen from './screens/AuthLoadingScreen';
+import ProfileScreen from './screens/ProfileScreen';
+import './ReactotronConfig';
 YellowBox.ignoreWarnings([
   'Warning: componentWillMount is deprecated',
   'Warning: componentWillReceiveProps is deprecated',
 ]);
-
-const mapStateToProps = state => {
-  return { user: state.user };
-}
 
 const mapDispatchToProps = dispatch => {
   return {
@@ -25,7 +26,7 @@ const mapDispatchToProps = dispatch => {
   };
 };
 
-const MainStack = StackNavigator(
+const AppStack = StackNavigator(
   {
     Home: {
       screen: HomeScreen
@@ -35,6 +36,9 @@ const MainStack = StackNavigator(
     },
     Characters: {
       screen: CharactersScreen
+    },
+    Profile: {
+      screen: ProfileScreen
     }
   },
   {
@@ -52,35 +56,27 @@ const MainStack = StackNavigator(
   }
 );
 
-export default class App extends React.Component {
-  constructor(props) {
-    super(props);
+const AuthStack = StackNavigator({ SignIn: SignInScreen });
 
-    this.state = {
-      loading: true,
-      user: null,
-      characters: {}
-    };
+const SwitchStack = SwitchNavigator(
+  {
+    AuthLoading: AuthLoadingScreen,
+    App: AppStack,
+    Auth: AuthStack
+  },
+  {
+    initialRouteName: 'AuthLoading'
   }
-
-  
-  async componentDidMount() {
-
-    await firebase.auth().onAuthStateChanged(user => {
-      if (user) {
-        console.log("Logged in", user);
-      }
-      else {
-        console.log("Not logged in");
-        this.setState({ loading: false });
-      }
-    });
-  }
-
+)
+export class App extends React.Component {
   render() {
 
   return (
-    <MainStack />
+    <Provider store={store}>
+      <SwitchStack />
+    </Provider>
     );
   }
 }
+
+export default App

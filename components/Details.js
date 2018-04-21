@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, AsyncStorage, StatusBar } from 'react-native';
 import { Button } from 'react-native-elements';
+import firebase from 'firebase';
 
 class DetailsScreen extends React.Component {
     static navigationOptions = ({ navigation, navigationOptions }) => {
@@ -15,6 +16,14 @@ class DetailsScreen extends React.Component {
         headerTintColor: navigationOptions.headerStyle.backgroundColor,
       };
     };
+    _signOutAsync = async () => {
+      firebase.auth().signOut;
+      console.log(this.props.user)
+      await AsyncStorage.clear();
+      this.props.navigation.navigate('Auth');
+      
+    };
+
     render() {
       /* 2. Read the params from the navigation state */
       const { params } = this.props.navigation.state;
@@ -26,6 +35,10 @@ class DetailsScreen extends React.Component {
           <Text>Details Screen</Text>
           <Text>itemId: {JSON.stringify(itemId)}</Text>
           <Text>otherParam: {JSON.stringify(otherParam)}</Text>
+          <Text>User: {firebase.auth().currentUser && firebase.auth().currentUser.email}</Text>
+          <StatusBar barStyle="default" />
+          <Text>{this.props.user}</Text>
+          <Button title="I'm done, sign me out" onPress={this._signOutAsync} />
           <Button
             title="Go to Details... again"
             onPress={() => this.props.navigation.navigate('Details')}
@@ -40,7 +53,8 @@ class DetailsScreen extends React.Component {
           />
         </View>
       );
+
     }
   }
 
-  export default DetailsScreen
+  export default DetailsScreen;
